@@ -10,7 +10,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>HallServlet</servlet-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>/go</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>PaymentServlet</servlet-name>

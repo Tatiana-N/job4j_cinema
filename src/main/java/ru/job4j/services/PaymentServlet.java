@@ -21,7 +21,7 @@ public class PaymentServlet extends HttpServlet {
 		int cells = Integer.parseInt(request.getParameterMap().get("cell")[0]);
 		dbStore.create(new Ticket(0, request.getSession().hashCode(), cells == 0 ? 12 : cells, rows, 1,
 				request.getSession().hashCode()));
-		response.sendRedirect(request.getContextPath() + "/");
+		response.sendRedirect(request.getContextPath() + "/go");
 	}
 	
 	/*
@@ -38,14 +38,14 @@ public class PaymentServlet extends HttpServlet {
 		Account accountFromDb = dbStore.save(account);
 		accountFromDb = accountFromDb.getId() == 0 ? dbStore.findAccount(account) : accountFromDb;
 		if (accountFromDb.getId() == 0) {
-			request.getRequestDispatcher("/").forward(request, response);
+			request.getRequestDispatcher("/go").forward(request, response);
 		} else {
 			Collection<Ticket> allTicketsThisSession = dbStore.findAllTicketsForPayment(request.getSession().hashCode());
 			for (Ticket ticket : allTicketsThisSession) {
 				ticket.setAccountId(accountFromDb.getId());
 				dbStore.update(ticket);
 			}
-			response.sendRedirect(request.getContextPath() + "/");
+			response.sendRedirect(request.getContextPath() + "/go");
 		}
 	}
 }

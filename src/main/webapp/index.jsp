@@ -29,24 +29,24 @@
     <h4>
         Бронирование билетов на сеанс
     </h4>
-    <form action="<%=request.getContextPath()%>/" method="post">
+    <form action="<%=request.getContextPath()%>/go" method="post">
         <table>
             <thead>
             <img src="<c:url value='screen.png'/>" width="700px" height="150px"/>
             </thead>
             <tbody>
-            <c:forEach begin="1" end="${rows}" varStatus="rows">
+            <c:forEach begin="1" end="9" varStatus="rows">
                 <tr>
                     <th><c:out value="${rows.count} ряд"/></th>
-                    <c:forEach begin="1" end="${cells}" varStatus="cells">
+                    <c:forEach begin="1" end="12" varStatus="cells">
                         <c:set var="myTest" value="empty"/>
                         <c:forEach items="${tickets}" var="ticet" varStatus="status">
                             <c:if test="${ticet.row == rows.count && ticet.cell == cells.count}">
                                 <c:set var="myTest" value="occupied"/>
-                                <c:if test="${ticet.session_id == 0}">
+                                <c:if test="${ticet.sessionId == 0}">
                                     <td><img src="<c:url value='occupied.png'/>" width="50px" height="50px"/></td>
                                 </c:if>
-                                <c:if test="${ticet.session_id != 0}">
+                                <c:if test="${ticet.sessionId != 0}">
                                     <td><img src="<c:url value='booked.png'/>" width="50px" height="50px"/></td>
                                 </c:if>
                             </c:if>
