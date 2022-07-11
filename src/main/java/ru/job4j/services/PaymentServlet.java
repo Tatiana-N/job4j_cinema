@@ -19,7 +19,8 @@ public class PaymentServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		int rows = Integer.parseInt(request.getParameterMap().get("row")[0]);
 		int cells = Integer.parseInt(request.getParameterMap().get("cell")[0]);
-		dbStore.create(new Ticket(0, request.getSession().hashCode(), cells == 0 ? 12 : cells, rows, 1, request.getSession().hashCode()));
+		dbStore.create(new Ticket(0, request.getSession().hashCode(), cells == 0 ? 12 : cells, rows, 1,
+				request.getSession().hashCode()));
 		response.sendRedirect(request.getContextPath() + "/");
 	}
 	
@@ -30,16 +31,18 @@ public class PaymentServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
 			IOException {
 		request.setCharacterEncoding("UTF-8");
-		Account account = new Account(0, request.getParameter("username"), request.getParameter("phone"),
+		Account account = new Account(0,
+				request.getParameter("username"),
+				request.getParameter("phone"),
 				request.getParameter("email"));
 		Account accountFromDb = dbStore.save(account);
-		accountFromDb = accountFromDb.getId() == 0 ? dbStore.findAccount(account): accountFromDb;
+		accountFromDb = accountFromDb.getId() == 0 ? dbStore.findAccount(account) : accountFromDb;
 		if (accountFromDb.getId() == 0) {
 			request.getRequestDispatcher("/").forward(request, response);
 		} else {
 			Collection<Ticket> allTicketsThisSession = dbStore.findAllTicketsForPayment(request.getSession().hashCode());
 			for (Ticket ticket : allTicketsThisSession) {
-				ticket.setAccount_id(accountFromDb.getId());
+				ticket.setAccountId(accountFromDb.getId());
 				dbStore.update(ticket);
 			}
 			response.sendRedirect(request.getContextPath() + "/");

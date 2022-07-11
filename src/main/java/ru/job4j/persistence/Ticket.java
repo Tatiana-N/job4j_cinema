@@ -7,18 +7,18 @@ import lombok.Setter;
 @Setter
 public class Ticket {
 	private  int id;
-	private  int account_id;
+	private  int accountId;
 	private final int cell;
 	private final int row;
-	private final int film_id;
-	private  int session_id;
+	private final int filmId;
+	private  int sessionId;
 	
-	public Ticket(int id, int account_id, int cell, int row, int film_id, int session_id) {
+	public Ticket(int id, int accountId, int cell, int row, int filmId, int sessionId) {
 		this.id = id;
-		this.account_id = account_id;
+		this.accountId = accountId;
 		this.cell = cell;
 		this.row = row;
-		this.film_id = film_id;
-		this.session_id = session_id;
+		this.filmId = filmId;
+		this.sessionId = sessionId;
 	}
 }
