@@ -18,7 +18,8 @@ public class DbStore {
 			Properties properties = new Properties();
 			properties.load(DbStore.class.getClassLoader().getResourceAsStream("app.properties"));
 			Class.forName(properties.getProperty("db.driver"));
-			connection = DriverManager.getConnection(properties.getProperty("db.url"), properties.getProperty("db.login"),
+			connection = DriverManager.getConnection(properties.getProperty("db.url"),
+					properties.getProperty("db.login"),
 					properties.getProperty("db.password"));
 		} catch (SQLException | IOException | ClassNotFoundException e) {
 			log.error(ERROR, e);
@@ -27,23 +28,24 @@ public class DbStore {
 	}
 	
 	public Collection<Ticket> findAllTicketsWithBooked(int sessionId) {
-		return findAllTickets().stream()
-				.filter(ticket -> ticket.getSessionId() == 0 || ticket.getSessionId() == sessionId).toList();
+		List<Ticket> ticketList = new ArrayList<>();
+		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM ticket "
+				+ "WHERE session_id = 0 or session_id = ?")) {
+			ps.setInt(1, sessionId);
+			getTicketListFromResultSet(ps);
+		} catch (Exception e) {
+			log.error(ERROR, e);
+		}
+		return ticketList;
 	}
 	
-	public Collection<Ticket> findAllTickets() {
+	public Collection<Ticket> findAllTicketsForDelete(Ticket ticket) {
 		List<Ticket> ticketList = new ArrayList<>();
-		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Ticket ")) {
-			try (ResultSet it = ps.executeQuery()) {
-				while (it.next()) {
-					ticketList.add(new Ticket(it.getInt("id"),
-							it.getInt("account_id"),
-							it.getInt("cell"),
-							it.getInt("row"),
-							it.getInt("film_id"),
-							it.getInt("session_id")));
-				}
-			}
+		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Ticket "
+				+ "where row = ? and cell = ? and sesseon_id != 0")) {
+			ps.setInt(1, ticket.getRow());
+			ps.setInt(2, ticket.getCell());
+			getTicketListFromResultSet(ps);
 		} catch (Exception e) {
 			log.error(ERROR, e);
 		}
@@ -51,8 +53,8 @@ public class DbStore {
 	}
 	
 	public Ticket create(Ticket ticket) {
-		try (PreparedStatement ps = connection.prepareStatement("INSERT into ticket  (account_id, film_id,session_id,row,cell) values "
-				+ "(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement ps = connection.prepareStatement("INSERT into ticket  (account_id, film_id,session_id,row,cell)"
+				+ "values (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
 			ps.setInt(1, 1);
 			ps.setInt(2, ticket.getFilmId());
 			ps.setInt(3, ticket.getSessionId());
@@ -70,15 +72,34 @@ public class DbStore {
 		return ticket;
 	}
 	
-	public Collection<Ticket> findAllTicketsForPayment(int hashCode) {
-		return findAllTicketsWithBooked(hashCode).stream()
-				.filter(ticket -> ticket.getSessionId() == hashCode)
-				.toList();
+	public Collection<Ticket> findAllTicketsForPayment(int sessionId) {
+		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM ticket WHERE session_id = ?")) {
+			ps.setInt(1, sessionId);
+			return getTicketListFromResultSet(ps);
+		} catch (Exception e) {
+			log.error(ERROR, e);
+		}
+		return new ArrayList<>();
+	}
+	
+	private Collection<Ticket> getTicketListFromResultSet(PreparedStatement ps) throws SQLException {
+		List<Ticket> ticketList = new ArrayList<>();
+		try (ResultSet it = ps.executeQuery()) {
+			while (it.next()) {
+				ticketList.add(new Ticket(it.getInt("id"),
+						it.getInt("account_id"),
+						it.getInt("cell"),
+						it.getInt("row"),
+						it.getInt("film_id"),
+						it.getInt("session_id")));
+			}
+		}
+		return ticketList;
 	}
 	
 	public Account save(Account account) {
-		try (PreparedStatement ps = connection.prepareStatement("INSERT into account  (username, email,phone) values "
-				+ "(?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement ps = connection.prepareStatement("INSERT into account  (username, email,phone) "
+				+ "values (?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
 			ps.setString(1, account.getUsername());
 			ps.setString(2, account.getEmail());
 			ps.setString(3, account.getPhone());
@@ -111,14 +132,12 @@ public class DbStore {
 	}
 	
 	public Boolean update(Ticket ticket) {
-		try (PreparedStatement ps = connection
-				.prepareStatement("UPDATE ticket SET account_id = ?, session_id = 0 where id = ?")) {
+		try (PreparedStatement ps = connection.prepareStatement("UPDATE ticket SET account_id = ?, session_id = 0 "
+				+ "where id = ?")) {
 			ps.setInt(1, ticket.getAccountId());
 			ps.setInt(2, ticket.getId());
 			boolean execute = ps.execute();
-			findAllTickets().stream().filter(tick -> tick.getRow() == ticket.getRow()
-					&& tick.getCell() == ticket.getCell()
-					&& tick.getSessionId() != 0).forEach(t -> deleteTicket(t.getId()));
+			findAllTicketsForDelete(ticket).forEach(t -> deleteTicket(t.getId()));
 			return execute;
 		} catch (Exception e) {
 			log.error(ERROR, e);
