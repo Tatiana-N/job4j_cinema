@@ -1,17 +1,19 @@
 package ru.job4j.store;
 
-import lombok.extern.slf4j.Slf4j;
+import org.apache.log4j.Logger;
 import ru.job4j.persistence.Account;
 import ru.job4j.persistence.Ticket;
+import ru.job4j.utils.MyLogger;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-@Slf4j
 public class DbStore {
 	private final Connection connection;
 	private static final String ERROR = "ошибка при выполнении запроса к базе данных";
+	private static final Logger LOGGER = MyLogger.getLogger();
+	
 	
 	public DbStore() {
 		try {
@@ -22,7 +24,7 @@ public class DbStore {
 					properties.getProperty("db.login"),
 					properties.getProperty("db.password"));
 		} catch (SQLException | IOException | ClassNotFoundException e) {
-			log.error(ERROR, e);
+			LOGGER.error(ERROR, e);
 			throw new RuntimeException("Не удалось установить соединение с базой данных");
 		}
 	}
@@ -34,7 +36,7 @@ public class DbStore {
 			ps.setInt(1, sessionId);
 			getTicketListFromResultSet(ps);
 		} catch (Exception e) {
-			log.error(ERROR, e);
+			LOGGER.error(ERROR, e);
 		}
 		return ticketList;
 	}
@@ -47,7 +49,7 @@ public class DbStore {
 			ps.setInt(2, ticket.getCell());
 			getTicketListFromResultSet(ps);
 		} catch (Exception e) {
-			log.error(ERROR, e);
+			LOGGER.error(ERROR, e);
 		}
 		return ticketList;
 	}
@@ -77,7 +79,7 @@ public class DbStore {
 			ps.setInt(1, sessionId);
 			return getTicketListFromResultSet(ps);
 		} catch (Exception e) {
-			log.error(ERROR, e);
+			LOGGER.error(ERROR, e);
 		}
 		return new ArrayList<>();
 	}
@@ -110,7 +112,7 @@ public class DbStore {
 				}
 			}
 		} catch (SQLException e) {
-			log.error(ERROR, e);
+			LOGGER.error(ERROR, e);
 		}
 		return account;
 	}
@@ -140,7 +142,7 @@ public class DbStore {
 			findAllTicketsForDelete(ticket).forEach(t -> deleteTicket(t.getId()));
 			return execute;
 		} catch (Exception e) {
-			log.error(ERROR, e);
+			LOGGER.error(ERROR, e);
 		}
 		return false;
 	}
@@ -150,7 +152,7 @@ public class DbStore {
 			ps.setInt(1, id);
 			ps.execute();
 		} catch (Exception e) {
-			log.error(ERROR, e);
+			LOGGER.error(ERROR, e);
 		}
 	}
 }
