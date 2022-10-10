@@ -31,9 +31,7 @@ public class PaymentServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
 			IOException {
 		request.setCharacterEncoding("UTF-8");
-		Account account = new Account(0,
-				request.getParameter("username"),
-				request.getParameter("phone"),
+		Account account = new Account(0, request.getParameter("username"), request.getParameter("phone"),
 				request.getParameter("email"));
 		Account accountFromDb = dbStore.save(account);
 		accountFromDb = accountFromDb.getId() == 0 ? dbStore.findAccount(account) : accountFromDb;
@@ -42,8 +40,9 @@ public class PaymentServlet extends HttpServlet {
 		} else {
 			Collection<Ticket> allTicketsThisSession = dbStore.findAllTicketsForPayment(request.getSession().hashCode());
 			for (Ticket ticket : allTicketsThisSession) {
-				ticket.setAccountId(accountFromDb.getId());
-				dbStore.update(ticket);
+				Ticket newTicket = new Ticket(ticket.getId(), accountFromDb.getId(), ticket.getCell(), ticket.getRow(),
+						ticket.getFilmId(), ticket.getSessionId());
+				dbStore.update(newTicket);
 			}
 			response.sendRedirect(request.getContextPath() + "/go");
 		}

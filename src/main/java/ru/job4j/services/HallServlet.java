@@ -11,14 +11,14 @@ import java.io.IOException;
 import java.util.Collection;
 
 public class HallServlet extends HttpServlet {
-	DbStore dbStore = new DbStore();
+	private final DbStore dbStore = new DbStore();
 	
 	/*
 	отображает билеты в кинозале
 	 */
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setIntHeader("Refresh", 5);
+//		response.setIntHeader("Refresh", 5);
 		request.setAttribute("tickets", dbStore.findAllTicketsWithBooked(request.getSession().hashCode()));
 		setHallAttribute(request);
 		request.getRequestDispatcher("index.jsp").forward(request, response);
