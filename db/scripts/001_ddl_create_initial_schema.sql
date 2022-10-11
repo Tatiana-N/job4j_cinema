@@ -4,7 +4,6 @@ CREATE TABLE account (
                          email VARCHAR NOT NULL UNIQUE,
                          phone VARCHAR NOT NULL UNIQUE
 );
-insert into account (username, email, phone) VALUES (1,1,1);
 
 CREATE TABLE ticket (
                         id SERIAL PRIMARY KEY,
