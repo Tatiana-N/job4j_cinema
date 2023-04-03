@@ -71,6 +71,7 @@ public class FilmDbStore extends DbStoreAbs {
 			try (ResultSet it = preparedStatement.getGeneratedKeys()) {
 				if (it.next()) {
 					film.setId(it.getInt(1));
+					return Optional.of(film);
 				}
 			}
 		} catch (SQLException e) {

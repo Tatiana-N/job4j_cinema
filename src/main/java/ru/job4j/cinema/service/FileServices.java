@@ -15,6 +15,10 @@ public class FileServices {
 	private FileDbStore dbStore;
 	
 	public Optional<File> findFileById(int id) {
-		return  dbStore.findFile(id);
+		return dbStore.findFile(id);
+	}
+	
+	public Optional<File> add(File file) {
+		return dbStore.add(file);
 	}
 }

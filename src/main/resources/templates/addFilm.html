@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+    <title>Кинотеатр мечты!</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Lato&display=swap");
+
+        :root {
+            --selected-color: #2ecc71;
+            --occupied-color: #e74c3c;
+            --available-color: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Lato", sans-serif;
+            background-color: #42fcf7;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .movie-container select {
+            background-color: #fff;
+            border: 0;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-left: 10px;
+            padding: 5px 15px 5px 15px;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .container {
+            perspective: 1000px;
+            margin-bottom: 3px;
+        }
+        .showcase {
+            background-color: rgba(232, 225, 225, 0.09);
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #1a1f4f;
+            list-style-type: none;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .showcase li {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+        }
+
+        .showcase li small {
+            margin-left: 2px;
+        }
+
+        .row {
+            display: flex;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Dream Cinema!</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" th:href="@{/index}">Главная <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" th:href="@{/films}">Кинотека</a>
+                <a class="nav-item nav-link" th:href="@{/schedule}">Расписание</a>
+                <a class="nav-item nav-link" th:if="${user.fullName == 'Гость'}" th:href="@{/loginPage}">
+                    <span th:text="${user.fullName}"></span>
+                    <span> | Войти</span>
+                </a>
+                <a class="nav-item nav-link" th:if="${user.fullName != 'Гость'}" th:href="@{/logout}">
+                    <span th:text="${user.fullName}"></span>
+                    <span> | Выйти</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+</div>
+<div class="container">
+    <a class="row">
+        <div class="showcase" style="width: 100%">
+            <div class="card-header">
+                Новый Фильм
+            </div>
+            <div class="card-body">
+                <form th:action="@{/addFilm}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="0"/>
+                    <div class="form-group">
+                        <label> Название
+                            <input type="text" class="form-control" name="name" id="name">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Описание
+                            <input type="text" class="form-control" name="description" id="description">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Жанр
+                            <select class="form-control" id="genre.id" name="genre.id">
+                                <option th:each="genre:${genres}" th:value="${genre.id}" th:text="${genre.name}">
+                                </option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Минимальный возраст
+                            <input type="number" class="form-control" name="minimalAge" id="minimalAge">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Продолжительность
+                            <input type="number" class="form-control" name="durationInMinutes" id="durationInMinutes">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Год выхода
+                            <input type="number" class="form-control" name="year" id="year">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Фотография
+                        </label>
+                        <input type="file" class="form-control" name="filmFile" id="filmFile">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </a>
+</div>
+</body>
+</html>

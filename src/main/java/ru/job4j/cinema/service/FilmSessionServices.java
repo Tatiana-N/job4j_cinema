@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.FilmSession;
 import ru.job4j.cinema.store.SessionDbStore;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -25,5 +26,9 @@ public class FilmSessionServices {
 	
 	public Collection<FilmSession> findAll() {
 		return dbStore.findAll();
+	}
+	
+	public void setNewSession(int filmId, int hallId) {
+		 dbStore.setNewSession(filmId, hallId);
 	}
 }

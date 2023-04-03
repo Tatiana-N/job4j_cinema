@@ -16,6 +16,7 @@ import java.util.Optional;
 @Slf4j
 public class FileDbStore extends DbStoreAbs {
 	private final String findByIdFile = "select * from files where id = ?";
+	private final String add = "insert into files (name, path) values(?,?)";
 	private final BasicDataSource pool = getPool();
 	
 	public Optional<File> findFile(int id) {
@@ -26,6 +27,24 @@ public class FileDbStore extends DbStoreAbs {
 			try (ResultSet rs = preparedStatement.getResultSet()) {
 				if (rs.next()) {
 					return Optional.of(createFile(rs));
+				}
+			}
+		} catch (SQLException e) {
+			log.error("Ошибка поиска в БД - " + e.getMessage());
+		}
+		return Optional.empty();
+	}
+	
+	public Optional<File> add(File file) {
+		try (Connection cn = pool.getConnection(); PreparedStatement preparedStatement = cn.prepareStatement(add,
+				PreparedStatement.RETURN_GENERATED_KEYS)) {
+			preparedStatement.setString(1, file.getName());
+			preparedStatement.setString(2, file.getPath());
+			preparedStatement.execute();
+			try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
+				if (rs.next()) {
+					file.setId(rs.getInt(1));
+					return Optional.of(file);
 				}
 			}
 		} catch (SQLException e) {

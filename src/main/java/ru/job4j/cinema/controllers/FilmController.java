@@ -8,21 +8,20 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.job4j.cinema.model.*;
-import ru.job4j.cinema.service.FileServices;
-import ru.job4j.cinema.service.FilmServices;
-import ru.job4j.cinema.service.FilmSessionServices;
-import ru.job4j.cinema.service.TicketServices;
+import ru.job4j.cinema.service.*;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ru.job4j.cinema.utils.UserUtil.getUser;
@@ -32,6 +31,7 @@ import static ru.job4j.cinema.utils.UserUtil.getUser;
 public class FilmController {
 	private final FilmServices filmServices;
 	private final FileServices fileServices;
+	private final GenreServices genreServices;
 	private final FilmSessionServices filmSessionServices;
 	private final TicketServices ticketServices;
 	
@@ -83,5 +83,26 @@ public class FilmController {
 				.contentLength(bytes.length)
 				.contentType(MediaType.parseMediaType("application/octet-stream"))
 				.body(new ByteArrayResource(bytes));
+	}
+	
+	@GetMapping("/addFilm")
+	public String addCandidate(Model model, HttpSession httpSession) {
+		model.addAttribute("user", getUser((User) httpSession.getAttribute("user")));
+		model.addAttribute("genres", genreServices.findAll());
+		return "addFilm";
+	}
+	
+	@PostMapping("/addFilm")
+	public String addFilm(@ModelAttribute Film film, @RequestParam("filmFile") MultipartFile filmFile) throws IOException {
+		String name = UUID.randomUUID() + ".jpeg";
+		Path path = Paths.get("src/main/resources/static/" + name);
+		Files.copy(filmFile.getInputStream(), path);
+		Optional<File> file = fileServices.add(new File(0, name, "src/main/resources/static/" + name));
+		file.ifPresent(film::setFile);
+		film.setGenre(genreServices.findGenre(film.getGenre().getId()).get());
+		Optional<Film> addFilm = filmServices.add(film);
+		filmSessionServices.setNewSession(addFilm.get().getId(), 1);
+		filmSessionServices.setNewSession(addFilm.get().getId(), 2);
+		return "redirect:films";
 	}
 }

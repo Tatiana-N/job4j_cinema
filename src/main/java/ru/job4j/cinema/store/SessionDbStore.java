@@ -24,6 +24,7 @@ public class SessionDbStore extends DbStoreAbs {
 	private final String findByIdFilmSessions = "select * from film_sessions where film_id = ?";
 	private final String findAll = "select * from film_sessions";
 	private final String findById = "select * from film_sessions where id = ?";
+	private final String newSession = "insert into film_sessions (film_id, halls_id, start_time, end_time) VALUES (?,?,'2023-10-13 13:00:03','2023-10-13 15:00:00');";
 	private final BasicDataSource pool = getPool();
 	
 	public Collection<FilmSession> findFilmSessions(int filmId) {
@@ -72,6 +73,16 @@ public class SessionDbStore extends DbStoreAbs {
 			log.error("Ошибка поиска в БД - " + e.getMessage());
 		}
 		return Optional.empty();
+	}
+	
+	public void setNewSession(int filmId, int hallId) {
+		try (Connection cn = pool.getConnection(); PreparedStatement preparedStatement = cn.prepareStatement(newSession)) {
+			preparedStatement.setInt(1, filmId);
+			preparedStatement.setInt(2, hallId);
+			preparedStatement.execute();
+		} catch (SQLException e) {
+			log.error("Ошибка поиска в БД - " + e.getMessage());
+		}
 	}
 	
 	private FilmSession createFilmSession(ResultSet rs) throws SQLException {
