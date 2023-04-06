@@ -2,6 +2,7 @@ package ru.job4j.cinema.store;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.File;
 import ru.job4j.cinema.store.api.DbStoreAbs;
@@ -18,6 +19,13 @@ public class FileDbStore extends DbStoreAbs {
 	private final String findByIdFile = "select * from files where id = ?";
 	private final String add = "insert into files (name, path) values(?,?)";
 	private final BasicDataSource pool = getPool();
+	
+	public FileDbStore(@Value("${db.driver}") String driver,
+	                   @Value("${db.url}") String password,
+	                   @Value("${db.login}")String user,
+	                   @Value("${db.password}") String url) {
+		super(driver, password, user, url);
+	}
 	
 	public Optional<File> findFile(int id) {
 		try (Connection cn = pool.getConnection(); PreparedStatement preparedStatement =

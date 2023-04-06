@@ -3,6 +3,7 @@ package ru.job4j.cinema.store;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.Hall;
 import ru.job4j.cinema.store.api.DbStoreAbs;
@@ -15,10 +16,16 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class HallDbStore extends DbStoreAbs {
 	private final String findByIdHall = "select * from halls where id = ?";
 	private final BasicDataSource pool = getPool();
+	
+	public HallDbStore(@Value("${db.driver}") String driver,
+	                   @Value("${db.url}") String password,
+	                   @Value("${db.login}")String user,
+	                   @Value("${db.password}") String url) {
+		super(driver, password, user, url);
+	}
 	
 	public Optional<Hall> findHall(int id) {
 		try (Connection cn = pool.getConnection(); PreparedStatement preparedStatement =

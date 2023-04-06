@@ -1,14 +1,28 @@
 package ru.job4j.cinema.store.api;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
-
-import java.io.IOException;
-import java.util.Properties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Slf4j
-public abstract class DbStoreAbs {
+public class DbStoreAbs {
 	private final BasicDataSource pool = new BasicDataSource();
+	private final String driver;
+	private final String password;
+	private final String user;
+	private final String url;
+	
+	public DbStoreAbs(String driver,
+	                  String password,
+	                  String user,
+	                   String url) {
+		this.driver = driver;
+		this.password = password;
+		this.user = user;
+		this.url = url;
+	}
 	
 	public BasicDataSource getPool() {
 		if (pool.getUrl() == null) {
@@ -18,17 +32,11 @@ public abstract class DbStoreAbs {
 	}
 	
 	private void setProperties() {
-		try {
-			Properties properties = new Properties();
-			properties.load(DbStoreAbs.class.getClassLoader().getResourceAsStream("application.properties"));
-			pool.setDriverClassName(properties.getProperty("db.driver"));
-			pool.setUrl(properties.getProperty("db.url"));
-			pool.setUsername(properties.getProperty("db.login"));
-			pool.setPassword(properties.getProperty("db.password"));
+			pool.setDriverClassName(driver);
+			pool.setUrl(url);
+			pool.setUsername(user);
+			pool.setPassword(password);
 			pool.setMaxIdle(10);
 			pool.setMinIdle(5);
-		} catch (IOException e) {
-			log.error("Не удалось установить соединение с базой данных", e);
-		}
 	}
 }

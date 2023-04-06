@@ -3,6 +3,7 @@ package ru.job4j.cinema.store;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.*;
 import ru.job4j.cinema.store.api.DbStoreAbs;
@@ -17,7 +18,6 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class SessionDbStore extends DbStoreAbs {
 	private FilmDbStore filmDbStore;
 	private HallDbStore hallDbStore;
@@ -26,6 +26,15 @@ public class SessionDbStore extends DbStoreAbs {
 	private final String findById = "select * from film_sessions where id = ?";
 	private final String newSession = "insert into film_sessions (film_id, halls_id, start_time, end_time) VALUES (?,?,'2023-10-13 13:00:03','2023-10-13 15:00:00');";
 	private final BasicDataSource pool = getPool();
+	
+	public SessionDbStore(@Value("${db.driver}") String driver,
+	                      @Value("${db.url}") String password,
+	                      @Value("${db.login}")String user,
+	                      @Value("${db.password}") String url,FilmDbStore filmDbStore, HallDbStore hallDbStore) {
+		super(driver, password, user, url);
+		this.filmDbStore = filmDbStore;
+		this.hallDbStore = hallDbStore;
+	}
 	
 	public Collection<FilmSession> findFilmSessions(int filmId) {
 		Collection<FilmSession> collection = new ArrayList<>();

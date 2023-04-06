@@ -3,6 +3,7 @@ package ru.job4j.cinema.store;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.*;
 import ru.job4j.cinema.store.api.DbStoreAbs;
@@ -17,7 +18,6 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class TicketDbStore extends DbStoreAbs {
 	private final UserDbStore userDbStore;
 	private final SessionDbStore filmSessionDbStore;
@@ -26,6 +26,15 @@ public class TicketDbStore extends DbStoreAbs {
 	private final String findAllBySessionId = "select * from tickets where session_id=?";
 	private final String add = "insert into tickets (session_id, row_number, place_number, user_id) VALUES (?,?,?,?)";
 	private final BasicDataSource pool = getPool();
+	
+	public TicketDbStore(@Value("${db.driver}") String driver,
+	                     @Value("${db.url}") String password,
+	                     @Value("${db.login}")String user,
+	                     @Value("${db.password}") String url,UserDbStore userDbStore, SessionDbStore filmSessionDbStore) {
+		super(driver, password, user, url);
+		this.userDbStore = userDbStore;
+		this.filmSessionDbStore = filmSessionDbStore;
+	}
 	
 	public Optional<Ticket> findBySessionIdRowCell(int sessionId, int row, int cell) {
 		try (Connection cn = pool.getConnection(); PreparedStatement preparedStatement =

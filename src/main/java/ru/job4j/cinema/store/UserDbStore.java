@@ -2,6 +2,7 @@ package ru.job4j.cinema.store;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.User;
 import ru.job4j.cinema.store.api.DbStoreAbs;
@@ -16,6 +17,13 @@ public class UserDbStore extends DbStoreAbs {
 	private final String findById = "select * from users where id = ?";
 	private final String add = "insert into users (full_name, email, password) values(?,?,?)";
 	private final BasicDataSource pool = getPool();
+	
+	public UserDbStore(@Value("${db.driver}") String driver,
+	                   @Value("${db.url}") String password,
+	                   @Value("${db.login}")String user,
+	                   @Value("${db.password}") String url) {
+		super(driver, password, user, url);
+	}
 	
 	public Optional<User> findById(int id) {
 		try (Connection connection = pool.getConnection()) {

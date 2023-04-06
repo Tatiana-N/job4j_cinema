@@ -3,6 +3,7 @@ package ru.job4j.cinema.store;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.*;
 import ru.job4j.cinema.store.api.DbStoreAbs;
@@ -17,7 +18,6 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class FilmDbStore extends DbStoreAbs {
 	private final FileDbStore fileDbStore;
 	private final GenreDbStore genreDbStore;
@@ -26,6 +26,15 @@ public class FilmDbStore extends DbStoreAbs {
 	private final String add = "insert into films (name, description, year, genre_id, minimal_age, duration_in_minutes, "
 			+ "file_id) values(?,?,?,?,?,?,?)";
 	private final BasicDataSource pool = getPool();
+	
+	public FilmDbStore(@Value("${db.driver}") String driver,
+	                   @Value("${db.url}") String password,
+	                   @Value("${db.login}")String user,
+	                   @Value("${db.password}") String url,FileDbStore fileDbStore, GenreDbStore genreDbStore) {
+		super(driver, password, user, url);
+		this.fileDbStore = fileDbStore;
+		this.genreDbStore = genreDbStore;
+	}
 	
 	public Collection<Film> findAll() {
 		Collection<Film> films = new ArrayList<>();
